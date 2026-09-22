@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#050505">
+  <title>키캡</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main aria-label="키캡 클릭커">
+    <div class="key-space">
+      <div class="shadow" aria-hidden="true"></div>
+      <button class="key" type="button" aria-label="키캡 누르기. 스페이스바 또는 엔터로도 누를 수 있습니다.">
+        <svg viewBox="0 0 440 280" aria-hidden="true">
+          <defs>
+            <linearGradient id="body" x1="0" y1="0" x2="0.7" y2="1">
+              <stop stop-color="#f0eee8"/>
+              <stop offset=".48" stop-color="#aaa79f"/>
+              <stop offset="1" stop-color="#5d5b56"/>
+            </linearGradient>
+            <linearGradient id="front" x1="0" y1="0" x2="0" y2="1">
+              <stop stop-color="#ccc9bf"/>
+              <stop offset="1" stop-color="#807d75"/>
+            </linearGradient>
+            <linearGradient id="rim" x1="0" y1="0" x2="1" y2="1">
+              <stop stop-color="#fffef8"/>
+              <stop offset=".45" stop-color="#e9e6db"/>
+              <stop offset="1" stop-color="#bdb9ad"/>
+            </linearGradient>
+            <radialGradient id="dish" cx=".58" cy=".66" r=".85">
+              <stop stop-color="#d5d2c7"/>
+              <stop offset=".65" stop-color="#e9e6dd"/>
+              <stop offset="1" stop-color="#fffef7"/>
+            </radialGradient>
+            <linearGradient id="glaze" x1="0" y1="0" x2="1" y2="1">
+              <stop stop-color="white" stop-opacity=".65"/>
+              <stop offset=".5" stop-color="white" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <path d="M53 49 Q57 36 73 35 L368 43 Q383 44 388 60 L413 214 Q416 230 398 238 L88 257 Q70 259 64 244 L29 98 Q25 81 37 68Z" fill="#25241f"/>
+          <path d="M51 45 Q56 33 72 33 L368 41 Q382 42 386 57 L412 207 Q415 223 398 231 L88 250 Q72 252 67 237 L30 94 Q26 80 38 65Z" fill="url(#body)"/>
+          <path d="M54 171 Q58 185 76 187 L374 177 Q389 176 393 164 L412 207 Q415 223 398 231 L88 250 Q72 252 67 237Z" fill="url(#front)"/>
+          <path d="M51 45 Q56 33 72 33 L368 41 Q382 42 385 58 L393 161 Q395 177 377 181 L76 193 Q61 194 56 180 L32 94 Q28 80 39 66Z" fill="url(#rim)"/>
+          <path d="M65 52 Q69 46 81 47 L358 53 Q370 54 372 66 L380 151 Q381 163 368 165 L83 176 Q72 177 69 166 L48 94 Q45 84 52 75Z" fill="url(#dish)"/>
+          <path d="M52 46 Q58 35 73 35 L367 43 Q380 44 383 57" fill="none" stroke="#fffef9" stroke-opacity=".8" stroke-width="2"/>
+          <path d="M39 85 Q42 75 52 63 L69 48 Q73 45 83 46 L357 52" fill="none" stroke="url(#glaze)" stroke-width="4" stroke-linecap="round"/>
+          <path d="M80 193 L375 181" stroke="#f7f3e6" stroke-opacity=".3" stroke-width="1.5"/>
+          <text x="79" y="92" fill="#65665e" font-family="Arial, sans-serif" font-size="20" letter-spacing=".5" transform="rotate(3 79 92)">esc</text>
+        </svg>
+      </button>
+    </div>
+    <output class="sr-only" aria-live="polite" aria-atomic="true"></output>
+  </main>
+  <script src="game.js"></script>
+</body>
+</html>
