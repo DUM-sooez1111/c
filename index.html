@@ -53,6 +53,15 @@
     </div>
     <output class="sr-only" aria-live="polite" aria-atomic="true"></output>
   </main>
+  <nav class="game-menu" aria-label="게임 메뉴"><button id="open-shop" type="button">상점</button><button id="open-inventory" type="button">인벤토리</button></nav>
+  <dialog id="collection" aria-labelledby="panel-title">
+    <header class="panel-header"><h1 id="panel-title">상점</h1><button id="close-panel" type="button" aria-label="닫기">닫기</button></header>
+    <p id="panel-info"></p>
+    <p class="panel-balance">보유 <span id="panel-coins">0</span> 코인</p>
+    <div id="sound-list"></div>
+    <p id="shop-message" role="status"></p>
+  </dialog>
+  <script src="store.js"></script>
   <script src="game.js"></script>
 </body>
 </html>
