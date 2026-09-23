@@ -2,23 +2,35 @@
   'use strict';
   const key = document.querySelector('.key');
   const output = document.querySelector('output');
+  const coins = document.querySelector('#coins');
   const held = new Set();
   let count = 0;
   let audio;
+  const noiseBuffers = new Map();
   let announceTimer;
 
   // Audio is synthesized locally; no sound files or network requests are needed.
-  function sound(release = false) {
+  async function sound(release = false) {
     try {
       const Audio = window.AudioContext || window.webkitAudioContext;
       if (!Audio) return;
-      audio ||= new Audio();
-      if (audio.state === 'suspended') void audio.resume().catch(() => {});
-      const now = audio.currentTime;
-      const duration = release ? .035 : .065;
-      const buffer = audio.createBuffer(1, Math.ceil(audio.sampleRate * duration), audio.sampleRate);
-      const samples = buffer.getChannelData(0);
-      for (let i = 0; i < samples.length; i++) samples[i] = (Math.random() * 2 - 1) * Math.exp(-i / (audio.sampleRate * .009));
+      audio ||= new Audio({ latencyHint: 'interactive' });
+      if (audio.state !== 'running') await audio.resume();
+      // Independent voices preserve the previous hit's tail during rapid input.
+      const now = audio.currentTime + .006;
+      const duration = release ? .09 : .16;
+      let buffer = noiseBuffers.get(release);
+      if (!buffer) {
+        buffer = audio.createBuffer(1, Math.ceil(audio.sampleRate * duration), audio.sampleRate);
+        const samples = buffer.getChannelData(0);
+        for (let i = 0; i < samples.length; i++) {
+          const t = i / audio.sampleRate;
+          const attack = Math.min(1, t / .0015);
+          const tail = Math.min(1, (samples.length - 1 - i) / (audio.sampleRate * .015));
+          samples[i] = (Math.random() * 2 - 1) * attack * Math.exp(-t / .014) * tail;
+        }
+        noiseBuffers.set(release, buffer);
+      }
       const noise = audio.createBufferSource();
       noise.buffer = buffer;
       const filter = audio.createBiquadFilter();
@@ -35,8 +47,10 @@
       const envelope = audio.createGain();
       tone.frequency.setValueAtTime(release ? 420 : 230, now);
       tone.frequency.exponentialRampToValueAtTime(85, now + duration);
-      envelope.gain.setValueAtTime(release ? .025 : .075, now);
-      envelope.gain.exponentialRampToValueAtTime(.001, now + duration);
+      envelope.gain.setValueAtTime(0, now);
+      envelope.gain.linearRampToValueAtTime(release ? .025 : .075, now + .002);
+      envelope.gain.exponentialRampToValueAtTime(.0001, now + duration - .015);
+      envelope.gain.linearRampToValueAtTime(0, now + duration);
       tone.connect(envelope).connect(audio.destination);
       tone.start(now);
       tone.stop(now + duration);
@@ -51,9 +65,10 @@
     if (wasPressed) return;
     key.classList.add('is-pressed');
     count++;
+    coins.textContent = count.toLocaleString('ko-KR');
     key.dataset.clicks = String(count);
     clearTimeout(announceTimer);
-    announceTimer = setTimeout(() => { output.textContent = `${count}회 클릭`; }, 250);
+    announceTimer = setTimeout(() => { output.textContent = `${count}코인 보유`; }, 250);
     sound();
   }
 
