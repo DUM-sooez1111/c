@@ -4,7 +4,17 @@
   const output = document.querySelector('output');
   const coins = document.querySelector('#coins');
   const held = new Set();
+  const coinStorageKey = 'keycap-clicker.coins.v1';
   let count = 0;
+  try {
+    const saved = window.localStorage.getItem(coinStorageKey);
+    if (saved !== null && /^\d+$/.test(saved)) {
+      const value = Number(saved);
+      if (Number.isSafeInteger(value)) count = value;
+    }
+  } catch { /* Storage may be unavailable; keep the game playable. */ }
+  coins.textContent = count.toLocaleString('ko-KR');
+  key.dataset.clicks = String(count);
   let audio;
   const noiseBuffers = new Map();
   let announceTimer;
@@ -64,7 +74,10 @@
     held.add(source);
     if (wasPressed) return;
     key.classList.add('is-pressed');
-    count++;
+    count = Math.min(count + 1, Number.MAX_SAFE_INTEGER);
+    try {
+      window.localStorage.setItem(coinStorageKey, String(count));
+    } catch { /* Keep earning coins in memory when storage is unavailable. */ }
     coins.textContent = count.toLocaleString('ko-KR');
     key.dataset.clicks = String(count);
     clearTimeout(announceTimer);
