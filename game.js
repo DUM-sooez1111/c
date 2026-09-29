@@ -20,17 +20,51 @@
   }
   updateCoins();
   let audio;
+  let masterGain;
+  const audioSettingsKey = 'keycap-clicker.audio.v1';
+  let volume = 100;
+  let muted = false;
+  try {
+    const saved = JSON.parse(storage?.getItem(audioSettingsKey) ?? 'null');
+    if (saved && Number.isInteger(saved.volume) && saved.volume >= 0 && saved.volume <= 100) volume = saved.volume;
+    if (saved && typeof saved.muted === 'boolean') muted = saved.muted;
+  } catch {}
+  const volumeInput = document.querySelector('#volume');
+  const muteButton = document.querySelector('#mute-audio');
+  function updateAudioSettings(save = false) {
+    volumeInput.value = String(volume);
+    volumeInput.setAttribute('aria-valuetext', `${volume}%${muted ? ', 음소거 중' : ''}`);
+    document.querySelector('#volume-value').textContent = `${volume}%`;
+    muteButton.textContent = muted ? '음소거 해제' : '음소거';
+    muteButton.setAttribute('aria-pressed', String(muted));
+    if (masterGain) masterGain.gain.setTargetAtTime(muted ? 0 : volume / 100, audio.currentTime, .01);
+    if (save) { try { storage?.setItem(audioSettingsKey, JSON.stringify({ volume, muted })); } catch {} }
+  }
+  volumeInput.addEventListener('input', () => {
+    volume = Math.max(0, Math.min(100, Number(volumeInput.value) || 0));
+    muted = false;
+    updateAudioSettings(true);
+  });
+  muteButton.addEventListener('click', () => { muted = !muted; updateAudioSettings(true); });
+  updateAudioSettings();
   const noiseBuffers = new Map();
   let announceTimer;
 
   // Audio is synthesized locally; no sound files or network requests are needed.
   async function sound(release = false, id = store.state.equipped) {
     try {
+      if (muted || volume === 0) return;
       const profile = catalog.find(item => item.id === id) || catalog[0];
       const Audio = window.AudioContext || window.webkitAudioContext;
       if (!Audio) return;
       audio ||= new Audio({ latencyHint: 'interactive' });
+      if (!masterGain) {
+        masterGain = audio.createGain();
+        masterGain.gain.value = muted ? 0 : volume / 100;
+        masterGain.connect(audio.destination);
+      }
       if (audio.state !== 'running') await audio.resume();
+      if (muted || volume === 0) return;
       // Independent voices preserve the previous hit's tail during rapid input.
       const now = audio.currentTime + .006;
       const duration = release ? profile.duration * .56 : profile.duration;
@@ -55,7 +89,7 @@
       filter.Q.value = .7;
       const gain = audio.createGain();
       gain.gain.value = release ? .12 : .24;
-      noise.connect(filter).connect(gain).connect(audio.destination);
+      noise.connect(filter).connect(gain).connect(masterGain);
       noise.start(now);
       noise.onended = () => { noise.disconnect(); filter.disconnect(); gain.disconnect(); };
 
@@ -68,7 +102,7 @@
       envelope.gain.linearRampToValueAtTime((release ? .025 : .075) * (profile.wave === 'square' ? .4 : 1), now + .002);
       envelope.gain.exponentialRampToValueAtTime(.0001, now + duration - .015);
       envelope.gain.linearRampToValueAtTime(0, now + duration);
-      tone.connect(envelope).connect(audio.destination);
+      tone.connect(envelope).connect(masterGain);
       tone.start(now);
       tone.stop(now + duration);
       tone.onended = () => { tone.disconnect(); envelope.disconnect(); };
@@ -103,7 +137,7 @@
     key.addEventListener(type, event => release(`pointer-${event.pointerId}`));
   }
   window.addEventListener('keydown', event => {
-    if (panel.open || (event.target.closest?.('button') && event.target !== key)) return;
+    if (panel.open || (event.target.closest?.('button, input, select, textarea, [contenteditable="true"]') && event.target !== key)) return;
     if (!['Space', 'Enter'].includes(event.code) || event.ctrlKey || event.altKey || event.metaKey) return;
     event.preventDefault();
     if (!event.repeat) press(event.code);

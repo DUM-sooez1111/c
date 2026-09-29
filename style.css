@@ -15,6 +15,12 @@ main { min-height: 100%; min-height: 100svh; display: grid; place-items: center;
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 @media (prefers-reduced-motion: reduce) { .key { transition: none; } }
 body { font-family: system-ui, sans-serif; }
+.audio-controls { position: fixed; bottom: max(92px, calc(env(safe-area-inset-bottom) + 64px)); left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 10px; width: min(340px, calc(100% - 28px)); color: #aaa496; font-size: 12px; }
+.audio-controls button { flex-shrink: 0; min-width: 76px; padding: 9px; border: 1px solid #494438; border-radius: 8px; background: #24221e; color: #ddd6c7; font: inherit; cursor: pointer; }
+.audio-controls button[aria-pressed="true"] { color: #e6c982; border-color: #a58c53; }
+.audio-controls label { white-space: nowrap; }
+#volume { flex: 1; min-width: 40px; height: 28px; accent-color: #d8b96e; cursor: pointer; }
+#volume-value { width: 36px; text-align: right; font-variant-numeric: tabular-nums; }
 .game-menu { position: fixed; bottom: max(28px, env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); display: flex; gap: 12px; }
 .game-menu button, dialog button { color: #ddd6c7; background: #24221e; border: 1px solid #494438; border-radius: 10px; padding: 10px 16px; font: inherit; cursor: pointer; }
 button:focus-visible { outline: 2px solid #d8b96e; outline-offset: 4px; }
