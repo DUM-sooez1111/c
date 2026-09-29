@@ -4,7 +4,7 @@
   const output = document.querySelector('output');
   const coins = document.querySelector('#coins');
   const held = new Set();
-  const clickCooldownMs = 300;
+  const clickCooldownMs = 5000;
   let nextPressAt = 0;
   let cooldownTimer;
   key.style.setProperty('--click-cooldown', `${clickCooldownMs}ms`);
