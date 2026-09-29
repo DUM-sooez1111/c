@@ -1,6 +1,6 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
-const { create, catalog, interval } = require('./store.js');
+const { create, catalog, skins, interval } = require('./store.js');
 function fixture(coins = '500') {
   const values = new Map([['keycap-clicker.coins.v1', coins]]);
   const storage = { getItem: key => values.get(key) ?? null, setItem: (key, value) => values.set(key, value) };
@@ -55,4 +55,46 @@ test('storage failure does not prevent playing', () => {
   game.earn();
   assert.equal(game.state.coins, 1);
   assert.equal(game.state.offers.length, 3);
+});
+test('skin purchase and independent equipment persist without duplicate charges', () => {
+  const f = fixture();
+  const game = f.open();
+  const id = game.state.skinOffers[0];
+  const price = skins.find(item => item.id === id).price;
+  game.buy(id, 'skin');
+  assert.equal(game.state.coins, 500 - price);
+  assert.ok(game.equip(id, 'skin'));
+  assert.equal(game.state.equipped, 'basic');
+  assert.equal(game.state.equippedSkin, id);
+  game.buy(id, 'skin');
+  assert.equal(game.state.coins, 500 - price);
+  assert.deepEqual(f.open().state, game.state);
+  assert.ok(game.equip('ivory', 'skin'));
+  assert.equal(game.equip('wood', 'skin'), false);
+});
+test('skin shop rotates and rejects expired and unaffordable purchases', () => {
+  const f = fixture();
+  const game = f.open();
+  const old = [...game.state.skinOffers];
+  f.advance(interval);
+  game.refresh();
+  assert.notDeepEqual([...game.state.skinOffers].sort(), old.sort());
+  const expired = old.find(id => !game.state.skinOffers.includes(id));
+  game.buy(expired, 'skin');
+  assert.equal(game.state.coins, 500);
+  const poor = fixture('0').open();
+  const id = poor.state.skinOffers[0];
+  poor.buy(id, 'skin');
+  assert.equal(poor.state.coins, 0);
+  assert.equal(poor.equip(id, 'skin'), false);
+});
+test('pre-skin save retains coins, sound purchases and shop deadline', () => {
+  const saved = { coins: 321, owned: ['basic', 'wood'], equipped: 'wood', offers: ['wood', 'glass', 'retro'], refreshAt: 1200000 };
+  const values = new Map([['keycap-clicker.save.v2', JSON.stringify(saved)]]);
+  const storage = { getItem: k => values.get(k) ?? null, setItem: (k, v) => values.set(k, v) };
+  const game = create(storage, () => 1000000);
+  for (const key of Object.keys(saved)) assert.deepEqual(game.state[key], saved[key]);
+  assert.equal(game.state.equippedSkin, 'ivory');
+  assert.equal(game.state.skinOffers.length, 3);
+  assert.deepEqual(create(storage, () => 1000000).state, game.state);
 });

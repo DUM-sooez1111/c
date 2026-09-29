@@ -37,3 +37,17 @@ dialog::backdrop { background: #000b; backdrop-filter: blur(5px); }
 .sound-actions { display: flex; flex-wrap: wrap; gap: 8px; }
 .sound-actions button { font-size: 13px; }
 #shop-message { min-height: 20px; margin-bottom: 0; color: #e6c982; font-size: 13px; }
+.category-buttons { display: flex; gap: 8px; margin-top: 20px; }
+.category-buttons button[aria-pressed="true"] { color: #f3d88d; background: #393122; border-color: #a58c53; }
+.skin-swatch { width: 86px; height: 48px; margin-bottom: 14px; border-radius: 10px; border: 2px solid var(--skin-light); border-bottom: 9px solid var(--skin-dark); background: linear-gradient(135deg, var(--skin-light), var(--skin-base)); color: var(--skin-ink); padding: 7px 10px; font-size: 12px; box-shadow: 0 5px 10px #0005; }
+.key[data-skin]:not([data-skin="ivory"]) #body stop:first-child,
+.key[data-skin]:not([data-skin="ivory"]) #rim stop:first-child,
+.key[data-skin]:not([data-skin="ivory"]) #dish stop:last-child { stop-color: var(--skin-light); }
+.key[data-skin]:not([data-skin="ivory"]) #body stop:nth-child(2),
+.key[data-skin]:not([data-skin="ivory"]) #rim stop:nth-child(2),
+.key[data-skin]:not([data-skin="ivory"]) #dish stop:not(:last-child),
+.key[data-skin]:not([data-skin="ivory"]) #front stop:first-child { stop-color: var(--skin-base); }
+.key[data-skin]:not([data-skin="ivory"]) #body stop:last-child,
+.key[data-skin]:not([data-skin="ivory"]) #rim stop:last-child,
+.key[data-skin]:not([data-skin="ivory"]) #front stop:last-child { stop-color: var(--skin-dark); }
+.key[data-skin]:not([data-skin="ivory"]) svg text { fill: var(--skin-ink); }

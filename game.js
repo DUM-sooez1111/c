@@ -13,6 +13,16 @@
   const info = document.querySelector('#panel-info');
   const message = document.querySelector('#shop-message');
   let mode = 'shop';
+  let category = 'sound';
+  function paintSkin(element, skin) {
+    for (const color of ['light', 'base', 'dark', 'ink']) element.style.setProperty(`--skin-${color}`, skin[color]);
+  }
+  function applySkin() {
+    const skin = KeycapStore.skins.find(item => item.id === store.state.equippedSkin);
+    key.dataset.skin = skin.id;
+    paintSkin(key, skin);
+  }
+  applySkin();
   function updateCoins() {
     coins.textContent = store.state.coins.toLocaleString('ko-KR');
     document.querySelector('#panel-coins').textContent = coins.textContent;
@@ -163,17 +173,22 @@
     const seconds = Math.max(0, Math.ceil((store.state.refreshAt - Date.now()) / 1000));
     info.textContent = mode === 'shop'
       ? `다음 상품 변경 ${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')} · 5분마다 랜덤 3종`
-      : `보유한 소리 ${store.state.owned.length}종 · 장착하면 키캡 소리가 바뀝니다.`;
+      : category === 'skin' ? `보유한 스킨 ${store.state.ownedSkins.length}종 · 소리와 별도로 장착합니다.` : `보유한 소리 ${store.state.owned.length}종 · 장착하면 키캡 소리가 바뀝니다.`;
   }
   function renderPanel() {
-    document.querySelector('#panel-title').textContent = mode === 'shop' ? '소리 상점' : '인벤토리';
+    document.querySelector('#panel-title').textContent = mode === 'shop' ? '상점' : '인벤토리';
+    document.querySelector('#category-sound').setAttribute('aria-pressed', String(category === 'sound'));
+    document.querySelector('#category-skin').setAttribute('aria-pressed', String(category === 'skin'));
     updateCoins();
     updateInfo();
     list.replaceChildren();
-    const ids = mode === 'shop' ? store.state.offers : store.state.owned;
+    const isSkin = category === 'skin';
+    const ownedItems = isSkin ? store.state.ownedSkins : store.state.owned;
+    const equipped = isSkin ? store.state.equippedSkin : store.state.equipped;
+    const ids = mode === 'shop' ? (isSkin ? store.state.skinOffers : store.state.offers) : ownedItems;
     for (const id of ids) {
-      const item = catalog.find(item => item.id === id);
-      const owned = store.state.owned.includes(id);
+      const item = (isSkin ? KeycapStore.skins : catalog).find(item => item.id === id);
+      const owned = ownedItems.includes(id);
       const card = document.createElement('article');
       card.className = 'sound-card';
       const name = document.createElement('h2');
@@ -182,26 +197,39 @@
       description.textContent = item.description;
       const actions = document.createElement('div');
       actions.className = 'sound-actions';
-      const preview = document.createElement('button');
-      preview.type = 'button';
-      preview.textContent = '미리듣기';
-      preview.setAttribute('aria-label', `${item.name} 미리듣기`);
-      preview.addEventListener('click', () => sound(false, id));
+      if (isSkin) {
+        const swatch = document.createElement('div');
+        swatch.className = 'skin-swatch';
+        swatch.textContent = 'esc';
+        swatch.setAttribute('aria-label', `${item.name} 색상 미리보기`);
+        paintSkin(swatch, item);
+        card.append(swatch);
+      } else {
+        const preview = document.createElement('button');
+        preview.type = 'button';
+        preview.textContent = '미리듣기';
+        preview.setAttribute('aria-label', `${item.name} 미리듣기`);
+        preview.addEventListener('click', () => sound(false, id));
+        actions.append(preview);
+      }
       const action = document.createElement('button');
       action.type = 'button';
       if (mode === 'shop') {
         action.textContent = owned ? '보유 중' : `${item.price} 코인 · 구매`;
         action.disabled = owned || store.state.coins < item.price;
-        action.addEventListener('click', () => { message.textContent = store.buy(id); renderPanel(); });
+        action.addEventListener('click', () => { message.textContent = store.buy(id, category); renderPanel(); });
       } else {
-        action.textContent = store.state.equipped === id ? '장착 중' : '장착';
-        action.disabled = store.state.equipped === id;
+        action.textContent = equipped === id ? '장착 중' : '장착';
+        action.disabled = equipped === id;
         action.addEventListener('click', () => {
-          if (store.equip(id)) { message.textContent = `${item.name} 장착 완료`; sound(false, id); }
+          if (store.equip(id, category)) {
+            message.textContent = `${item.name} 장착 완료`;
+            if (isSkin) applySkin(); else sound(false, id);
+          }
           renderPanel();
         });
       }
-      actions.append(preview, action);
+      actions.append(action);
       card.append(name, description, actions);
       list.append(card);
     }
@@ -217,6 +245,14 @@
   document.querySelector('#open-shop').addEventListener('click', () => openPanel('shop'));
   document.querySelector('#open-inventory').addEventListener('click', () => openPanel('inventory'));
   document.querySelector('#close-panel').addEventListener('click', () => panel.close());
+  for (const kind of ['sound', 'skin']) {
+    document.querySelector(`#category-${kind}`).addEventListener('click', () => {
+      category = kind;
+      message.textContent = '';
+      store.refresh();
+      renderPanel();
+    });
+  }
   setInterval(() => {
     const changed = store.refresh();
     if (!panel.open) return;
