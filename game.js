@@ -200,7 +200,6 @@
       if (isSkin) {
         const swatch = document.createElement('div');
         swatch.className = 'skin-swatch';
-        swatch.textContent = 'esc';
         swatch.setAttribute('aria-label', `${item.name} 색상 미리보기`);
         paintSkin(swatch, item);
         card.append(swatch);

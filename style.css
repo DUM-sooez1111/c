@@ -6,11 +6,11 @@ body { background: #050505; }
 .coin-icon { display: grid; place-items: center; width: 25px; height: 25px; border: 1px solid #c7a85d; border-radius: 50%; color: #e8c773; background: #292113; font-size: 14px; }
 .coin-label { color: #888174; font-size: 13px; }
 main { min-height: 100%; min-height: 100svh; display: grid; place-items: center; }
-.key-space { position: relative; width: min(82vw, 380px); aspect-ratio: 11 / 7; }
-.shadow { position: absolute; inset: 43% 0 -3% 3%; background: #000; border-radius: 40%; filter: blur(17px); transform: rotate(-7deg); opacity: .95; }
+.key-space { position: relative; width: min(90vw, 680px); aspect-ratio: 4 / 1; }
+.shadow { position: absolute; inset: 43% 0 -3% 3%; background: #000; border-radius: 40%; filter: blur(17px); transform: translateY(4px); opacity: .95; }
 .key { position: relative; display: block; width: 100%; height: 100%; padding: 0; border: 0; background: transparent; cursor: pointer; -webkit-tap-highlight-color: transparent; touch-action: none; user-select: none; outline: none; transform: translateY(-5px); transition: transform 95ms cubic-bezier(.2,.8,.3,1), filter 95ms; }
 .key svg { display: block; width: 100%; height: 100%; overflow: visible; pointer-events: none; filter: drop-shadow(2px 13px 7px #000); }
-.key.is-pressed { transform: translateY(6px) scale(.985); filter: brightness(.94); transition-duration: 35ms; }
+.key.is-pressed { transform: translateY(4px) scale(.995); filter: brightness(.94); transition-duration: 35ms; }
 .key:focus-visible::after { content: ''; position: absolute; inset: -10px; border: 1px solid #77756b; border-radius: 28px; }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 @media (prefers-reduced-motion: reduce) { .key { transition: none; } }
@@ -39,7 +39,7 @@ dialog::backdrop { background: #000b; backdrop-filter: blur(5px); }
 #shop-message { min-height: 20px; margin-bottom: 0; color: #e6c982; font-size: 13px; }
 .category-buttons { display: flex; gap: 8px; margin-top: 20px; }
 .category-buttons button[aria-pressed="true"] { color: #f3d88d; background: #393122; border-color: #a58c53; }
-.skin-swatch { width: 86px; height: 48px; margin-bottom: 14px; border-radius: 10px; border: 2px solid var(--skin-light); border-bottom: 9px solid var(--skin-dark); background: linear-gradient(135deg, var(--skin-light), var(--skin-base)); color: var(--skin-ink); padding: 7px 10px; font-size: 12px; box-shadow: 0 5px 10px #0005; }
+.skin-swatch { width: 160px; height: 40px; margin-bottom: 14px; border-radius: 10px; border: 2px solid var(--skin-light); border-bottom: 9px solid var(--skin-dark); background: linear-gradient(135deg, var(--skin-light), var(--skin-base)); color: var(--skin-ink); padding: 7px 10px; font-size: 12px; box-shadow: 0 5px 10px #0005; }
 .key[data-skin]:not([data-skin="ivory"]) #body stop:first-child,
 .key[data-skin]:not([data-skin="ivory"]) #rim stop:first-child,
 .key[data-skin]:not([data-skin="ivory"]) #dish stop:last-child { stop-color: var(--skin-light); }
