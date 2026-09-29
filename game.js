@@ -4,6 +4,10 @@
   const output = document.querySelector('output');
   const coins = document.querySelector('#coins');
   const held = new Set();
+  const clickCooldownMs = 300;
+  let nextPressAt = 0;
+  let cooldownTimer;
+  key.style.setProperty('--click-cooldown', `${clickCooldownMs}ms`);
   let storage;
   try { storage = window.localStorage; } catch {}
   const store = KeycapStore.create(storage);
@@ -121,9 +125,15 @@
 
   function press(source) {
     if (held.has(source)) return;
+    const now = performance.now();
+    if (!held.size && now < nextPressAt) return;
     const wasPressed = held.size > 0;
     held.add(source);
     if (wasPressed) return;
+    nextPressAt = now + clickCooldownMs;
+    clearTimeout(cooldownTimer);
+    key.classList.add('is-cooling');
+    cooldownTimer = setTimeout(() => key.classList.remove('is-cooling'), clickCooldownMs);
     key.classList.add('is-pressed');
     store.earn();
     updateCoins();
